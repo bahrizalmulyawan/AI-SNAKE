@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroSnake — AI Lab</title>
+<style>
+:root{--bg:#080d16;--panel:#101a29;--panel2:#0c1421;--line:#23344a;--text:#e7f0ff;--muted:#8ca2bd;--green:#55f2a6;--cyan:#5bdcff;--orange:#ffbf69;--red:#ff647c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#14263b 0,transparent 42%),var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,select,input{font:inherit}button,select{color:var(--text);background:#17263a;border:1px solid #2b4059;border-radius:8px;padding:9px 12px;cursor:pointer}button:hover{border-color:var(--green)}button.primary{background:var(--green);color:#06140e;border-color:var(--green);font-weight:800}button:disabled{opacity:.4;cursor:not-allowed}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line);background:#080d16cc;position:sticky;top:0;z-index:3;backdrop-filter:blur(12px)}.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--cyan));display:grid;place-items:center;color:#06140e;font-size:22px;font-weight:900}.brand h1{font-size:18px;margin:0;letter-spacing:.04em}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.live{font-size:11px;color:var(--green);letter-spacing:.12em}.live:before{content:"";display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:7px;box-shadow:0 0 12px var(--green)}
+.layout{max-width:1600px;margin:auto;padding:20px;display:grid;grid-template-columns:minmax(310px,1.05fr) minmax(330px,1fr) minmax(300px,.9fr);gap:16px}.panel{background:linear-gradient(180deg,#111d2d,#0d1623);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-head h2{font-size:13px;margin:0;letter-spacing:.1em;text-transform:uppercase}.eyebrow{color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase}.panel-body{padding:16px}.game-panel{grid-row:span 2}.game-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.scoreline{display:flex;gap:18px}.metric strong{display:block;font-size:22px;line-height:1.2}.metric span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.game-wrap{position:relative;max-width:560px;margin:auto}.game-canvas{width:100%;aspect-ratio:1;display:block;background:#09121e;border:1px solid #263b51;border-radius:8px;image-rendering:pixelated}.overlay{position:absolute;inset:0;display:grid;place-items:center;background:#07101acc;border-radius:8px;text-align:center;padding:24px}.overlay.hidden{display:none}.overlay h3{font-size:24px;margin:0 0 6px}.overlay p{color:var(--muted);max-width:270px}.game-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hint{color:var(--muted);font-size:11px;margin-top:12px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}.field select{width:100%}.wide{grid-column:1/-1}.toggles{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toggles label{color:var(--muted);font-size:12px}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:10px;background:#0a1420;border:1px solid #1e3044;border-radius:9px}.stat strong{font-size:18px;display:block}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase}.viz-canvas{width:100%;display:block;background:#09121e;border:1px solid #20334a;border-radius:8px}.spike-controls{display:grid;gap:12px;margin-top:14px;padding:12px;background:#0a1420;border:1px solid #1e3044;border-radius:9px}.spike-control{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center}.spike-control label{color:var(--muted);font-size:11px}.spike-control input{grid-column:1/-1;width:100%;accent-color:var(--green);cursor:pointer}.spike-control output{font-size:11px;color:var(--green);font-variant-numeric:tabular-nums}.viz-label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin:10px 0 7px}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:10px;margin-top:9px}.dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:5px}.log{height:115px;overflow:auto;background:#08111c;border:1px solid #20334a;border-radius:8px;padding:10px;font:11px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a8c3df}.log .ok{color:var(--green)}.log .warn{color:var(--orange)}.section-gap{margin-top:18px}.progress{height:5px;background:#1b2a3d;border-radius:99px;overflow:hidden;margin-top:8px}.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--cyan));transition:width .2s}.foot{max-width:1600px;margin:0 auto;padding:0 20px 24px;color:#61758e;font-size:11px}.kbd{border:1px solid #30445b;border-radius:4px;padding:1px 5px;color:#bed0e5}
+@media(max-width:1100px){.layout{grid-template-columns:1fr 1fr}.game-panel{grid-row:span 2}.right-col{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px}.right-col .panel{height:max-content}}
+.env-input-toggle{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;background:#0a1420;border:1px solid #29445a;border-radius:9px}.env-input-toggle strong{font-size:11px;color:var(--text)}.env-input-toggle label{font-size:12px;color:var(--green);display:flex;align-items:center;gap:6px}.env-input-toggle .hint{flex-basis:100%;margin:0}.manual-box{margin-top:14px;padding:12px;background:#0a1420;border:1px solid #29445a;border-radius:10px}.manual-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.manual-head strong{font-size:12px}.manual-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.manual-options label{font-size:11px;color:var(--muted)}.dpad{display:grid;grid-template-columns:repeat(3,clamp(36px,10vw,46px));grid-template-rows:repeat(3,clamp(34px,8vw,42px));gap:4px;justify-content:center;margin:10px auto 4px;touch-action:none;user-select:none;max-width:100%}.dpad button{padding:0;font-size:17px;line-height:1;font-weight:800;touch-action:none;user-select:none;min-width:0;min-height:0;border-radius:7px}@media(max-width:720px){.manual-box{padding:10px}.dpad{grid-template-columns:repeat(3,38px);grid-template-rows:repeat(3,35px);gap:3px;margin:8px auto 3px}.dpad button{font-size:15px;padding:0}.manual-options{grid-template-columns:1fr}}@media(max-width:360px){.dpad{grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,32px);gap:3px}.dpad button{font-size:14px}}.dpad .up{grid-column:2;grid-row:1}.dpad .left{grid-column:1;grid-row:2}.dpad .right{grid-column:3;grid-row:2}.dpad .down{grid-column:2;grid-row:3}.manual-status{font-size:11px;color:var(--green);text-align:center;margin-top:8px}.manual-status.off{color:var(--muted)}@media(max-width:720px){header{padding:14px;align-items:flex-start}.layout{padding:12px;grid-template-columns:1fr}.game-panel{grid-row:auto}.right-col{grid-column:auto;display:flex;flex-direction:column}.header-right .live{display:none}.panel-body{padding:12px}.foot{padding:0 12px 20px}}
+
+/* Header layout cleanup: consistent action button sizing and responsive alignment */
+header{display:grid;grid-template-columns:minmax(220px,auto) minmax(0,650px);align-items:center;justify-content:space-between;gap:20px;padding:16px 24px}
+.brand{min-width:0;flex-shrink:0}
+.header-right{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:8px;width:100%;min-width:0}
+.header-right .live{grid-column:1/-1;display:block;line-height:1.2;padding:0 2px}
+.header-right button{width:100%;min-width:0;min-height:40px;height:40px;padding:7px 9px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;overflow-wrap:anywhere;line-height:1.15;font-size:12px}
+@media(max-width:900px){header{grid-template-columns:1fr;gap:14px;padding:14px 18px}.header-right{max-width:none;grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:720px){header{padding:14px;align-items:center}.header-right{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.header-right .live{display:none}.header-right button{height:42px;min-height:42px;font-size:12px}.brand h1{font-size:18px}.brand p{font-size:11px}}
+@media(max-width:360px){.header-right{grid-template-columns:1fr}.header-right button{height:auto;min-height:40px}}
+/* Mobile environment visibility fix */
+@media(max-width:720px){
+  .layout{display:flex;flex-direction:column;gap:12px;padding:8px}
+  .game-panel{order:-10;grid-row:auto;overflow:visible}
+  .game-panel .panel-head{padding:10px 12px}
+  .game-panel .panel-body{padding:9px}
+  .game-top{gap:6px;align-items:flex-start;margin-bottom:8px}
+  .scoreline{gap:clamp(8px,3vw,16px);min-width:0;flex-wrap:wrap}
+  .metric strong{font-size:18px}
+  .metric span{font-size:9px;letter-spacing:.06em}
+  #status{font-size:9px;white-space:nowrap}
+  .game-wrap{width:100%;max-width:min(100%, calc(100vw - 38px));margin:0 auto}
+  .game-canvas{width:100%;height:auto;aspect-ratio:1;display:block}
+  .overlay{background:rgba(7,16,26,.42);padding:12px;backdrop-filter:blur(1px)}
+  .overlay h3{font-size:19px}
+  .overlay p{font-size:11px;line-height:1.35;margin:5px auto 10px;max-width:230px}
+  .overlay>div>div:first-child{font-size:25px!important}
+  .overlay button{padding:8px 10px;font-size:12px}
+  .game-panel .hint{font-size:10px;line-height:1.35;margin-top:8px}
+  .game-actions{margin-top:9px}
+}
+@media(max-width:380px){
+  .game-panel .panel-body{padding:7px}
+  .game-wrap{max-width:calc(100vw - 30px)}
+  .metric strong{font-size:16px}
+  .scoreline{gap:7px}
+  .overlay p{max-width:190px;font-size:10px}
+}
+/* Final mobile viewport fix: keep the arena unobstructed and reclaim screen space. */
+@media(max-width:720px){
+  header{position:relative;top:auto;backdrop-filter:none;padding:8px 10px;gap:8px}
+  .brand{gap:8px}
+  .logo{width:30px;height:30px;font-size:18px;border-radius:9px}
+  .brand h1{font-size:16px}
+  .brand p{font-size:10px;line-height:1.25}
+  .layout{padding:6px;gap:8px}
+  .game-panel{order:-100;position:relative;display:block;visibility:visible;max-width:100%;}
+  .game-panel .panel-head{padding:8px 10px}
+  .game-panel .panel-body{padding:7px}
+  /* The overlay covers the entire board on load; mobile has a separate Start button below it. */
+  .game-panel .game-wrap .overlay{display:none!important}
+  .game-wrap{width:min(100%, calc(100vw - 28px));max-width:calc(100vw - 28px)}
+  .game-canvas{width:100%;max-width:100%;height:auto;aspect-ratio:1}
+  .game-top{margin-bottom:5px}
+  .game-panel .hint{margin-top:5px}
+  .game-panel .hint + .game-actions{margin-top:7px}
+}
+@media(max-width:380px){
+  .game-wrap{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
+  .game-panel .panel-body{padding:5px}
+  .game-panel .panel-head h2{font-size:11px}
+}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">⌁</div><div><h1>NEURO<span style="color:var(--green)">SNAKE</span></h1><p>Autonomous agent playground / v0.9</p></div></div><div class="header-right"><span class="live">SYSTEM ONLINE</span><button id="exportBtn">Export .json</button><button id="csvBtn">Download scientific CSV</button><button id="demoCsvBtn">Export human demos</button><button id="importBtn">Load .json</button><button id="clearDataBtn" style="border-color:#ff647c;color:#ff647c">🗑 Hapus data learning</button><input type="file" id="fileInput" accept=".json,application/json" hidden></div></header>
+<main class="layout">
+<section class="panel game-panel"><div class="panel-head"><h2>01 / Environment</h2><span class="eyebrow">16 × 16 arena</span></div><div class="panel-body"><div class="game-top"><div class="scoreline"><div class="metric"><strong id="score">0</strong><span>Food collected</span></div><div class="metric"><strong id="moves">0</strong><span>Moves</span></div><div class="metric"><strong id="best">0</strong><span>Best score</span></div></div><span class="eyebrow" id="status">IDLE</span></div><div class="game-wrap"><canvas id="game" class="game-canvas" width="512" height="512" aria-label="Snake game board"></canvas><div class="overlay" id="overlay"><div><div style="font-size:34px;color:var(--green)">◈</div><h3>Ready to learn</h3><p>Agent memilih langkah satu per satu lewat Q-learning dan reward; tidak ada rute makanan yang diprogram. Trapped episodes restart while preserving its learned policy.</p><button class="primary" id="overlayStart">▶ Start agent</button></div></div></div><p class="hint">Tidak ada jalur makanan yang diprogram. AI memutuskan satu langkah per tick dari state + Q-value hasil belajar + reward + keselamatan. Garis hijau = jejak gerakan sebelumnya. Garis putus-putus oranye = jejak gerakan aktual. Garis biru = rute BFS yang dihitung saat BFS aktif.</p><div class="hint">AI: <span class="kbd">Space</span> pause/resume · <span class="kbd">R</span> reset. Manual: WASD, arrows, numpad 8/4/2/6, gamepad/analog, or touch pad.</div>
+
+<!-- MANUAL MODE — compact, moved above the Start / Reset buttons -->
+<div class="manual-box compact manual-off">
+  <div class="manual-head">
+    <strong>🎮 MANUAL / DEMO</strong>
+    <div class="manual-options"><label><input type="checkbox" id="recordManual" checked disabled> Rekam gerakan user</label></div>
+    <button id="manualModeBtn" type="button">Enable manual</button>
+  </div>
+  <div class="manual-grid">
+    <div class="dpad" aria-label="Touch controls">
+      <button class="up" data-dir="0" aria-label="Up" disabled>▲</button>
+      <button class="left" data-dir="3" aria-label="Left" disabled>◀</button>
+      <button class="right" data-dir="1" aria-label="Right" disabled>▶</button>
+      <button class="down" data-dir="2" aria-label="Down" disabled>▼</button>
+    </div>
+    <div class="manual-side">
+      <div id="manualStatus" class="manual-status off">Manual mode OFF · AI controls the snake</div>
+      <div class="hint">Gerakan manual disimpan sebagai demonstrasi + transisi Q-learning. Export .json untuk memindahkan data.</div>
+    </div>
+  </div>
+</div>
+
+<div class="env-input-toggle manual-off"><strong>🎮 Environment input</strong><label><input type="checkbox" id="gamepadEnabled" checked disabled> Gamepad / analog ON</label><span class="hint">Checklist OFF menonaktifkan input gamepad; keyboard dan tombol sentuh tetap berfungsi.</span></div>
+
+<div class="game-actions"><button class="primary" id="startBtn">▶ Start agent</button><button id="resetBtn">↻ Reset</button></div>
+
+<div class="section-gap"><div class="viz-label"><span>Learning progress</span><span><b id="generationText">Gen 1</b> · <span id="episodeText">Episode 1</span></span></div><div class="progress"><div id="progressBar"></div></div></div></div></section>
+<section class="panel"><div class="panel-head"><h2>02 / Agent configuration</h2><span class="eyebrow">Policy setup</span></div><div class="panel-body"><div class="controls"><div class="field"><label for="learningParadigm">Learning paradigm</label><select id="learningParadigm"><option value="RL">Reinforcement learning (Q-learning)</option><option value="SUPERVISED">Supervised learning</option><option value="UNSUPERVISED">Unsupervised learning</option><option value="HYBRID">Hybrid (supervised + RL)</option></select></div><div class="field"><label for="model">Model architecture</label><select id="model"><option value="CNN">CNN</option><option value="PERCEPTRON">PERCEPTRON</option><option value="QUADRUPLE">QUADRUPLE — Full AI Ensemble</option><option value="SNN">SNN (biasa)</option><option value="SNN_NEURO">SNN (neuromorphic-like)</option></select></div><div class="field"><label for="maze">Maze preset</label><select id="maze"><option value="none">No maze</option><option value="pillars">Pillar field</option><option value="spiral">Spiral walls</option><option value="cross">Cross corridors</option><option value="random">Random walls</option></select></div><div class="field"><label for="speed">Agent speed</label><select id="speed"><option value="220">Slow · 4.5 moves/s</option><option value="120" selected>Normal · 8 moves/s</option><option value="55">Fast · 18 moves/s</option></select></div><div class="field"><label for="difficulty">Food placement</label><select id="difficulty"><option value="safe">Reachable food</option><option value="random">Random food</option></select></div><div class="field wide"><label>Learning mode</label><div class="toggles"><label><input type="checkbox" id="learn" checked> Online self-improvement</label><label><input type="checkbox" id="continuous"> Continuous learning (auto-restart)</label><label><input type="checkbox" id="showVision" checked> Show agent vision</label><label><input type="checkbox" id="showPath" checked> Show movement trail</label><label><input type="checkbox" id="showFoodPath" checked> Show/hide jalur makanan (jejak keputusan AI)</label><label><input type="checkbox" id="bfsMode"> Aktifkan BFS mode (mencari makanan pakai BFS)</label><label><input type="checkbox" id="showBfsPath" checked> Tampilkan jalur BFS</label><label style="color:var(--orange);font-weight:700;flex-basis:100%">⚠️ Rule Breaker</label><label><input type="checkbox" id="rbEnabled"> Aktifkan Rule Breaker (ON/OFF)</label><label><input type="checkbox" id="rbSelf" disabled> Tidak reset saat menabrak diri</label><label><input type="checkbox" id="rbNoFood" disabled> Tidak reset jika tidak makan ≥60 detik</label><label><input type="checkbox" id="rbMaze" disabled> Bisa tembus maze</label><label><input type="checkbox" id="rbPass" disabled> Passtrough (bisa tembus tepi)</label></div></div></div><p class="hint" id="learningDescription"><strong>Reinforcement learning:</strong> Q-learning updates action values from rewards. Supervised mode learns from generated labeled examples; unsupervised mode clusters observations without correct-action labels; hybrid mode seeds a policy from labeled examples then continues with rewards. Safety checks remain active in every mode.</p><p class="hint"><strong>Decision-based AI:</strong> secara default BFS nonaktif dan agent memilih langkah dari state, nilai Q, reward, kunjungan berulang, dan keselamatan. Aktifkan checklist BFS mode bila ingin agent menghitung rute terpendek ke makanan dengan Breadth-First Search; matikan checklist untuk kembali ke kebijakan Q-learning.</p><div class="section-gap"><div class="stats-grid"><div class="stat"><strong id="generationBest">—</strong><span>Best generation (all-time)</span></div><div class="stat"><strong id="epsilon">0.90</strong><span>Exploration ε</span></div><div class="stat"><strong id="qvalue">0.00</strong><span>Q estimate</span></div><div class="stat"><strong id="weights">0</strong><span>Policy weights</span></div></div></div><div class="section-gap"><div class="viz-label"><span>Agent event stream</span><button id="clearLog" style="padding:3px 8px;font-size:10px">Clear</button></div><div class="log" id="log"></div></div><div class="section-gap"><div class="viz-label"><span>Generation history</span><span id="historyCount">0 records</span></div><div class="log" id="historyLog" style="height:150px"></div></div><div class="section-gap"><div class="viz-label"><span>AI CLI / live counters</span><span class="eyebrow">LOCAL TERMINAL</span></div><div class="stats-grid"><div class="stat"><strong id="cliFoods">0</strong><span>Foods</span></div><div class="stat"><strong id="cliMoves">0</strong><span>Total moves</span></div><div class="stat"><strong id="cliUpdates">0</strong><span>Q updates</span></div><div class="stat"><strong id="cliReward">0.00</strong><span>Total reward</span></div></div><div class="log" id="cliLog" style="height:125px;margin-top:8px"></div><div style="display:flex;gap:6px;margin-top:8px"><input id="cliInput" placeholder="help, stats, learn on, reset" style="min-width:0;flex:1;background:#08111c;color:var(--text);border:1px solid #20334a;border-radius:8px;padding:8px;font:11px ui-monospace,monospace"><button id="cliRun">Run</button></div><p class="hint">Commands: <code>help</code>, <code>stats</code>, <code>learn on/off</code>, <code>speed 4-18</code>, <code>clear</code>.</p></div></div></section>
+<div class="right-col" style="display:contents">
+<section class="panel" id="activityPanel"><div class="panel-head"><h2>03 / Neural activity</h2><span class="eyebrow" id="activityType">SNN · LIF neurons</span></div><div class="panel-body"><div class="viz-label"><span id="activityLabel">Live membrane / spike map</span><span id="activeNeurons">0 / 256 spiking</span></div><canvas id="snn" class="viz-canvas" width="320" height="320"></canvas><div class="spike-controls"><div class="eyebrow">Manual spike controls</div><div class="spike-control"><label for="spikeThreshold">Spike threshold (lower = more spikes)</label><output id="spikeThresholdValue">0.46</output><input id="spikeThreshold" type="range" min="0.10" max="0.90" step="0.01" value="0.46"></div><div class="spike-control"><label for="spikeInput">Input gain (higher = more spikes)</label><output id="spikeInputValue">0.42</output><input id="spikeInput" type="range" min="0.10" max="1.00" step="0.01" value="0.42"></div><div class="spike-control"><label for="spikeLeak">Membrane retention (higher = longer-lasting potential)</label><output id="spikeLeakValue">0.89</output><input id="spikeLeak" type="range" min="0.70" max="0.99" step="0.01" value="0.89"></div><button id="spikeReset" type="button">Reset spike settings</button></div><div class="legend" id="activityLegend"><span><i class="dot" style="background:#193149"></i>Below threshold</span><span><i class="dot" style="background:#42b9d7"></i>Membrane potential</span><span><i class="dot" style="background:#55f2a6"></i>Real spike event</span></div><p class="hint" id="activityHint">SNN uses leaky integrate-and-fire (LIF) state: input accumulates in membrane potential, leaks over time, and emits a spike only when threshold is crossed. Perceptron/CNN do not show this panel.</p></div></section>
+<section class="panel"><div class="panel-head"><h2>04 / Trajectory memory</h2><span class="eyebrow">16 × 16 × 16</span></div><div class="panel-body"><div class="viz-label"><span>Recent state stack</span><span id="stackCount">0 / 16 frames</span></div><canvas id="track" class="viz-canvas" width="320" height="320"></canvas><div class="legend"><span><i class="dot" style="background:#55f2a6"></i>Snake trail</span><span><i class="dot" style="background:#ffbf69"></i>Food</span><span><i class="dot" style="background:#2c4967"></i>Wall / older state</span></div><div class="section-gap"><div class="viz-label"><span>Move decision</span><span id="decision">—</span></div><div class="log" id="decisionLog">Awaiting first observation…</div></div></div></section>
+</div>
+</main><div class="foot">NEUROSNAKE LAB · Educational prototype. Reinforcement mode uses tabular Q-learning; supervised mode uses online nearest-example guidance from a safe-action teacher; unsupervised mode clusters observations and still relies on Q-learning for action rewards. These are lightweight demonstrations, not production neural networks. Policy state can be exported as JSON or scientific CSV. Learned policy is saved in this browser and can improve across sessions; export JSON for backup or transfer.</div>
+<script>
+(()=>{'use strict';
+const N=16, game=document.getElementById('game'),ctx=game.getContext('2d'),snn=document.getElementById('snn'),sx=snn.getContext('2d'),track=document.getElementById('track'),tx=track.getContext('2d');
+const $=id=>document.getElementById(id);let snake,dir,food,walls,moves,score,best=0,running=false,timer=null,episode=1,generation=1,epsilon=.25,qEstimate=0,policy={},trail=[],foodPath=[],frames=[],lastState='',lastAction=1,manual=false,episodes=0,genBest=0,bestGeneration=1,history=[],recentVisits=new Map(),recentTrail=[],activity=new Array(256).fill(0),membrane=new Array(256).fill(0),spikeEvents=0,autoRestartTimer=null,noFoodSince=Date.now();
+const dirs=[{x:0,y:-1,name:'UP'},{x:1,y:0,name:'RIGHT'},{x:0,y:1,name:'DOWN'},{x:-1,y:0,name:'LEFT'}];
+const MEMORY_KEY='neurosnake-learning-v1';let learningUpdates=0, totalFoods=0, totalMoves=0, totalReward=0, manualModeEnabled=false, manualSamples=[], gamepadLastDir=-1, gamepadPoll=null, holdMoveTimer=null;
+function persistLearning(){try{const empty=!Object.keys(policy).length&&!supervisedExamples.length&&!clusters.length&&!manualSamples.length&&!history.length&&best===0&&generation===1&&episode<=1;if(empty){localStorage.removeItem(MEMORY_KEY);return;}localStorage.setItem(MEMORY_KEY,JSON.stringify({policy,epsilon,best,bestGeneration,generation,episode,genBest,history,learningParadigm:$('learningParadigm').value,supervisedExamples:supervisedExamples.slice(-1500),clusters:clusters.slice(-300),manualSamples:manualSamples.slice(-5000)}));}catch(e){log('Browser storage unavailable · use Export .json to keep learning','warn')}}
+function restoreLearning(){try{const raw=localStorage.getItem(MEMORY_KEY);if(!raw)return;const d=JSON.parse(raw);if(!d||typeof d!=='object')return;policy=d.policy||{};epsilon=Number.isFinite(d.epsilon)?Math.max(.04,Math.min(.28,d.epsilon)):.25;best=d.best||0;bestGeneration=d.bestGeneration||1;generation=d.generation||1;episode=d.episode||1;episodes=episode;genBest=d.genBest||0;history=Array.isArray(d.history)?d.history:[];if(Array.isArray(d.supervisedExamples))supervisedExamples.push(...d.supervisedExamples);if(Array.isArray(d.clusters))clusters.push(...d.clusters);if(Array.isArray(d.manualSamples))manualSamples=d.manualSamples.slice(-5000);log('Persistent learning restored · '+Object.keys(policy).length+' learned states · '+manualSamples.length+' human demonstrations','ok')}catch(e){console.warn('Could not restore NeuroSnake learning',e)}}
+window.addEventListener('pagehide',persistLearning);
+function key(p){return p.x+','+p.y}function inside(p){return p.x>=0&&p.y>=0&&p.x<N&&p.y<N}function same(a,b){return a.x===b.x&&a.y===b.y}
+function makeWalls(){walls=new Set();const mode=$('maze').value;if(mode==='pillars'){for(let y=3;y<13;y++)for(let x of [4,11])if(y!==7&&y!==8)walls.add(`${x},${y}`)}else if(mode==='spiral'){for(let x=3;x<13;x++){if(x!==6)walls.add(`${x},3`);if(x!==9)walls.add(`${x},12`)}for(let y=3;y<13;y++){if(y!==4)walls.add(`3,${y}`);if(y!==10)walls.add(`12,${y}`)}for(let x=5;x<11;x++)if(x!==9)walls.add(`${x},5`);for(let y=5;y<11;y++)if(y!==8)walls.add(`5,${y}`);for(let x=5;x<10;x++)if(x!==6)walls.add(`${x},10`)}else if(mode==='cross'){for(let i=1;i<15;i++){if(![4,5,10,11].includes(i)){walls.add(`${i},7`);walls.add(`8,${i}`)}}}else if(mode==='random'){for(let i=0;i<35;i++){let x=1+Math.floor(Math.random()*14),y=1+Math.floor(Math.random()*14);if(!(x<5&&y<5))walls.add(`${x},${y}`)}}}
+// Additional learning paradigms for demonstration and experimentation.
+const supervisedExamples=[], observationCounts=new Map(), clusters=[];
+function observationFeatures(){const h=snake[0],space=spaceAfter(h);return [Math.sign(food.x-h.x),Math.sign(food.y-h.y),dir,Math.min(15,Math.floor(space.area/8)),Math.min(3,space.exits),...actions().map(nd=>{const p={x:h.x+dirs[nd].x,y:h.y+dirs[nd].y};return blocked(p,false)?1:0})]}
+function featureKey(f){return f.join(',')}
+function supervisedAction(f){ // nearest labeled safe example; falls back to the learned RL policy
+  if(!supervisedExamples.length)return null;
+  let best=null,bestD=Infinity;
+  for(const ex of supervisedExamples){let d=0;for(let i=0;i<f.length;i++)d+=(f[i]-ex.f[i])**2;if(d<bestD){bestD=d;best=ex}}
+  return best?best.a:null;
+}
+function unsupervisedCluster(f){ // online prototype clustering of observations, not action labels
+  let best=-1,bestD=Infinity;
+  for(let i=0;i<clusters.length;i++){let d=0;for(let j=0;j<f.length;j++)d+=(f[j]-clusters[i].center[j])**2;if(d<bestD){bestD=d;best=i}}
+  if(best<0||bestD>8){clusters.push({center:f.slice(),count:1});best=clusters.length-1}
+  else{const c=clusters[best];c.count++;c.center=c.center.map((v,j)=>v+(f[j]-v)/c.count)}
+  const k=String(best);observationCounts.set(k,(observationCounts.get(k)||0)+1);return best;
+}
+function updateParadigmUI(){const p=$('learningParadigm')?.value||'RL',descriptions={RL:'<strong>Reinforcement learning:</strong> Q-learning updates action values from rewards.',SUPERVISED:'<strong>Supervised learning:</strong> learns from labeled examples generated by a safe-action teacher; this is a lightweight online classifier, not a neural network.',UNSUPERVISED:'<strong>Unsupervised learning:</strong> clusters similar observations without action labels. Clusters influence exploration, while Q-learning still learns which actions earn rewards.',HYBRID:'<strong>Hybrid:</strong> uses labeled safe-action examples to guide early choices, then improves action values with reinforcement learning.'};$('learningDescription').innerHTML=descriptions[p]+' Safety checks remain active in every mode.'}
+function reset(keepLearning=true){noFoodSince=Date.now();recentVisits.clear();recentTrail=[];membrane.fill(0);activity.fill(0);spikeEvents=0;pause();if(autoRestartTimer){clearTimeout(autoRestartTimer);autoRestartTimer=null;}makeWalls();snake=[{x:4,y:8},{x:3,y:8},{x:2,y:8}];dir=1;moves=score=0;trail=[];frames=[];manual=false;food=spawnFood();foodPath=[{...snake[0]}];lastState='';lastAction=1;episodes++;episode=Math.max(1,episodes);if(!keepLearning){policy={};epsilon=.25;qEstimate=0;generation=1;genBest=0;totalReward=0;totalFoods=0;totalMoves=0;learningUpdates=0;}$('overlay').classList.remove('hidden');$('status').textContent='IDLE';$('startBtn').textContent='▶ Start agent';log('Environment reset · maze: '+$('maze').value,'ok');render();updateStats();updateCLI();drawSNN();drawTrack()}
+function spawnFood(){let free=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++){let p={x,y};if(!snake.some(s=>same(s,p))&&!walls.has(key(p)))free.push(p)}if(!free.length)return {x:0,y:0};if($('difficulty').value==='safe'){free.sort((a,b)=>dist(a,snake[0])-dist(b,snake[0]));return free[Math.floor(Math.random()*Math.min(12,free.length))]}return free[Math.floor(Math.random()*free.length)]}
+function dist(a,b){return Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}
+function normalizePosition(p){return ruleBreakerOn('rbPass')?{x:(p.x+N)%N,y:(p.y+N)%N}:p}
+function blocked(p,allowTail=true){p=normalizePosition(p);return (!ruleBreakerOn('rbPass')&&!inside(p))||walls.has(key(p))||snake.slice(0,allowTail?-1:snake.length).some(s=>same(s,p))}
+// Estimate free space after a candidate move so the agent can learn to avoid traps, not only immediate collisions.
+function spaceAfter(next){const occupied=new Set(snake.slice(0,-1).map(key));occupied.delete(key(snake[0]));occupied.add(key(next));const seen=new Set([key(next)]),queue=[next];let exits=0;for(const d of dirs){const p={x:next.x+d.x,y:next.y+d.y};if(inside(p)&&!walls.has(key(p))&&!occupied.has(key(p)))exits++}for(let i=0;i<queue.length&&seen.size<N*N;i++){const p=queue[i];for(const d of dirs){const n={x:p.x+d.x,y:p.y+d.y},k=key(n);if(inside(n)&&!walls.has(k)&&!occupied.has(k)&&!seen.has(k)){seen.add(k);queue.push(n)}}}return {area:seen.size,exits}}
+function state(){let h=snake[0],dirsRel=[dirs[(dir+3)%4],dirs[dir],dirs[(dir+1)%4]],danger=dirsRel.map(d=>blocked({x:h.x+d.x,y:h.y+d.y},false)?1:0);const dx=food.x-h.x,dy=food.y-h.y,fx=Math.sign(dx),fy=Math.sign(dy),foodXBin=Math.max(-3,Math.min(3,Math.trunc(dx/3))),foodYBin=Math.max(-3,Math.min(3,Math.trunc(dy/3))),space=spaceAfter(h);return [...danger,fx,fy,foodXBin,foodYBin,dir,Math.min(15,Math.floor(space.area/8)),Math.min(3,space.exits)].join(',')}
+function actions(){return [0,1,2].map(a=>(dir+a+3)%4)} // relative left, straight, right
+function ruleBreakerOn(id){return !!$('rbEnabled')?.checked && !!$(id)?.checked}
+function syncRuleBreakerUI(){const enabled=$('rbEnabled').checked;for(const id of ['rbSelf','rbNoFood','rbMaze','rbPass'])$(id).disabled=!enabled;}
+function canEnter(p){p=normalizePosition(p);if(!inside(p))return false;const hitsWall=walls.has(key(p)),hitsSelf=snake.slice(0,-1).some(s=>same(s,p));return (!hitsWall||ruleBreakerOn('rbMaze'))&&(!hitsSelf||ruleBreakerOn('rbSelf'))}
+function candidateActions(){const head=snake[0];return actions().map((nd,i)=>({nd,i,next:{x:head.x+dirs[nd].x,y:head.y+dirs[nd].y}})).filter(o=>canEnter(o.next)).map(o=>o.i)}
+function safeMoves(){return actions().map(d=>({d,p:{x:snake[0].x+dirs[d].x,y:snake[0].y+dirs[d].y}})).filter(o=>!blocked(o.p,false))}
+function safeActionIndices(){const head=snake[0],opts=actions();const safe=opts.map((nd,i)=>({nd,i,next:{x:head.x+dirs[nd].x,y:head.y+dirs[nd].y}})).filter(o=>!blocked(o.next,false)).map(o=>o.i);if(safe.length)return safe;return opts.map((nd,i)=>({nd,i,next:{x:head.x+dirs[nd].x,y:head.y+dirs[nd].y}})).filter(o=>canEnter(o.next)).map(o=>o.i)}
+function actionSafety(i){const nd=actions()[i],h=snake[0],next={x:h.x+dirs[nd].x,y:h.y+dirs[nd].y},space=spaceAfter(next);return space.area-Math.max(0,snake.length-space.exits)*2+space.exits*5}
+function cli(msg){const el=$('cliLog');if(!el)return;const row=document.createElement('div');row.textContent='> '+msg;el.appendChild(row);while(el.children.length>35)el.firstChild.remove();el.scrollTop=el.scrollHeight;}
+function updateCLI(){if($('cliFoods'))$('cliFoods').textContent=totalFoods;if($('cliMoves'))$('cliMoves').textContent=totalMoves;if($('cliUpdates'))$('cliUpdates').textContent=learningUpdates;if($('cliReward'))$('cliReward').textContent=totalReward.toFixed(2);}
+function runCLI(){const input=$('cliInput'),raw=input.value.trim().toLowerCase();if(!raw)return;input.value='';cli('$ '+raw);const parts=raw.split(/\s+/);if(parts[0]==='help')cli('help | stats | learn on/off | speed 4-18 | demos | clear');else if(parts[0]==='stats')cli(`score=${score} best=${best} episode=${episode} generation=${generation} moves=${totalMoves} foods=${totalFoods} q_updates=${learningUpdates} states=${Object.keys(policy).length} demos=${manualSamples.length} epsilon=${epsilon.toFixed(3)}`);else if(parts[0]==='demos')cli('human demonstrations saved: '+manualSamples.length+' · use Export .json to include them');else if(parts[0]==='learn'&&['on','off'].includes(parts[1])){$('learn').checked=parts[1]==='on';cli('online learning '+parts[1]);}else if(parts[0]==='speed'){const n=Number(parts[1]);if(Number.isFinite(n)&&n>=4&&n<=18){$('speed').value=String(Math.round(1000/n));if(running){pause();start()}cli('speed set to '+n+' moves/s')}else cli('usage: speed 4-18');}else if(parts[0]==='clear'){$('cliLog').replaceChildren();cli('terminal cleared');}else cli('unknown command; type help');}
+function bfsFoodPath(){
+  if(!snake?.length||!food)return [];
+  const start={...snake[0]},startKey=key(start),goalKey=key(food);
+  if(startKey===goalKey)return [start];
+  // Match BFS action planning: body cells block the route except the moving tail.
+  const occupied=new Set(snake.slice(0,-1).map(key));occupied.delete(startKey);
+  const queue=[start],parent=new Map([[startKey,null]]),seen=new Set([startKey]);
+  for(let qi=0;qi<queue.length;qi++){
+    const cur=queue[qi],ck=key(cur);
+    for(let d=0;d<4;d++){
+      const next={x:cur.x+dirs[d].x,y:cur.y+dirs[d].y},nk=key(next);
+      if(!inside(next)||walls.has(nk)||occupied.has(nk)||seen.has(nk))continue;
+      seen.add(nk);parent.set(nk,ck);
+      if(nk===goalKey){const path=[];let at=goalKey;while(at!==null){const [x,y]=at.split(',').map(Number);path.push({x,y});at=parent.get(at)??null;}return path.reverse();}
+      queue.push(next);
+    }
+  }
+  return [];
+}
+function bfsFoodAction(){
+  if(!snake?.length||!food)return null;
+  const start={...snake[0]},startKey=key(start),goalKey=key(food);
+  if(startKey===goalKey)return null;
+  // Treat the tail as traversable because it moves away on a non-food step.
+  const occupied=new Set(snake.slice(0,-1).map(key));occupied.delete(startKey);
+  const queue=[start],firstStep=new Map([[startKey,null]]),seen=new Set([startKey]);
+  for(let qi=0;qi<queue.length;qi++){
+    const cur=queue[qi],ck=key(cur);
+    for(let d=0;d<4;d++){
+      const raw={x:cur.x+dirs[d].x,y:cur.y+dirs[d].y};
+      if(!inside(raw)||walls.has(key(raw))||occupied.has(key(raw)))continue;
+      const nk=key(raw);if(seen.has(nk))continue;seen.add(nk);
+      const first=ck===startKey?d:firstStep.get(ck);firstStep.set(nk,first);
+      if(nk===goalKey){const relative=actions().indexOf(first);return relative>=0?relative:null;}
+      queue.push(raw);
+    }
+  }
+  return null;
+}
+function choose(){
+  const s=state(),safe=safeActionIndices(),q=policy[s]||[0,0,0];
+  // BFS mode is opt-in. When unchecked, decision-making remains Q-learning/epsilon-greedy only.
+  if($('bfsMode')?.checked){const bfsAction=bfsFoodAction();if(bfsAction!==null&&safe.includes(bfsAction))return bfsAction;}
+
+  if(!safe.length)return -1;
+  const paradigm=$('learningParadigm')?.value||'RL',features=observationFeatures(),ensemble=$('model').value==='QUADRUPLE';
+  let clusterId=null;if(paradigm==='UNSUPERVISED'||ensemble)clusterId=unsupervisedCluster(features);
+  const scores=safe.map(i=>({i,v:actionSafety(i)})),maxSafety=Math.max(...scores.map(o=>o.v));
+  let viable=scores.filter(o=>o.v>=maxSafety-Math.max(5,snake.length*.35)).map(o=>o.i);if(!viable.length)viable=safe;
+  const visitCount=i=>{const nd=actions()[i],h=snake[0],k=key({x:h.x+dirs[nd].x,y:h.y+dirs[nd].y});return recentVisits.get(k)||0};
+  const leastVisited=Math.min(...viable.map(visitCount)),fresh=viable.filter(i=>visitCount(i)===leastVisited);
+  let guided=supervisedAction(features);
+  if(!ensemble&&(paradigm==='SUPERVISED'||paradigm==='HYBRID')&&guided!==null&&viable.includes(guided)&&Math.random()<(paradigm==='SUPERVISED'?.8:.45)&&visitCount(guided)<=leastVisited+1)return guided;
+  // Unscripted policy: epsilon-greedy exploration plus learned Q-values. No BFS/path planner.
+  if(Math.random()<epsilon&&!manual){const pool=fresh.length?fresh:viable;return pool[Math.floor(Math.random()*pool.length)]}
+  const value=i=>{
+    const nd=actions()[i],h=snake[0],next={x:h.x+dirs[nd].x,y:h.y+dirs[nd].y};
+    const safety=actionSafety(i),foodProgress=dist(h,food)-dist(next,food),learned=q[i]||0,loopPenalty=visitCount(i)*.22;
+    if(ensemble){
+      const nextFeatures=[Math.sign(food.x-next.x),Math.sign(food.y-next.y),nd,Math.min(15,Math.floor(spaceAfter(next).area/8)),Math.min(3,spaceAfter(next).exits)];
+      let novelty=1;if(clusters.length){let nearest=Infinity;for(const c of clusters){let d=0;for(let j=0;j<Math.min(nextFeatures.length,c.center.length);j++)d+=(nextFeatures[j]-c.center[j])**2;nearest=Math.min(nearest,d)}novelty=Math.min(3,nearest/10)}
+      const supervisedVote=guided===i?1:0,cnnLike=foodProgress,perceptronLike=foodProgress*.7+safety*.03,cellIndex=next.y*N+next.x,snnLike=(membrane[cellIndex]||0)*.2+Math.max(0,foodProgress)*.15;
+      return learned*.8+safety*.002+cnnLike*.12+perceptronLike*.08+supervisedVote*.12+novelty*.015+snnLike-loopPenalty;
+    }
+    // Reward shaping is intentionally small; the learned policy gets the main vote.
+    return learned+safety*.002+foodProgress*.12-loopPenalty;
+  };
+  const bestV=Math.max(...viable.map(value)),ties=viable.filter(i=>Math.abs(value(i)-bestV)<1e-9);
+  return ties[Math.floor(Math.random()*ties.length)];
+}
+function move(forceAction=null){if(!snake||!food)return;const humanMove=manualModeEnabled&&manual&&forceAction!==null&&$('recordManual').checked;const humanFeatures=humanMove?observationFeatures():null;const humanState=humanMove?state():null;if(Date.now()-noFoodSince>=60000&&!ruleBreakerOn('rbNoFood')){log('No food collected for 1 minute · resetting environment to initial state.','warn');reset(true);return}let s=state(),safe=safeActionIndices(),action=forceAction===null?choose():forceAction;if(!safe.length){log('Collision avoidance: no safe exit remains; episode stopped before impact.','warn');if($('learn').checked)learn(s,0,-.25,s);endEpisode();return}if(!safe.includes(action)){const fallback=choose();log('Collision avoidance engaged · unsafe move rejected; choosing a safe exit.','warn');action=fallback<0?safe[0]:fallback}let nd=actions()[action],head=snake[0],rawNext={x:head.x+dirs[nd].x,y:head.y+dirs[nd].y},hitBoundary=!inside(rawNext),next=normalizePosition(rawNext);const hitWall=walls.has(key(next)),hitSelf=snake.slice(0,-1).some(p=>same(p,next));let oldDist=dist(head,food),reward=-.015;if((hitBoundary&&!ruleBreakerOn('rbPass')) || (hitWall&&!ruleBreakerOn('rbMaze')) || (hitSelf&&!ruleBreakerOn('rbSelf'))){log('Safety shield blocked a collision before movement.','warn');return}if(hitBoundary&&ruleBreakerOn('rbPass'))log('Passtrough: crossed arena edge and entered from opposite side.','ok');if(hitWall&&ruleBreakerOn('rbMaze'))log('Rule-Breaker: passed through maze wall.','warn');if(hitSelf&&ruleBreakerOn('rbSelf'))log('Rule-Breaker: self-collision allowed without reset.','warn');dir=nd;snake.unshift(next);const ateFood=same(next,food);foodPath.push({...next});if(foodPath.length>256)foodPath.shift();const visitKey=key(next);recentTrail.push(visitKey);recentVisits.set(visitKey,(recentVisits.get(visitKey)||0)+1);if(recentTrail.length>80){const expired=recentTrail.shift(),left=(recentVisits.get(expired)||1)-1;if(left<=0)recentVisits.delete(expired);else recentVisits.set(expired,left)}if(ateFood){
+totalFoods++;updateCLI();recentVisits.clear();recentTrail=[];score++;noFoodSince=Date.now();reward=1;food=spawnFood();foodPath=[{...next}];persistLearning();log('Food found · reward +1 · score '+score,'ok')}else snake.pop();if(dist(next,food)<oldDist)reward+=.04;else reward-=.025;const postSpace=spaceAfter(next);if(postSpace.exits<=1)reward-=.12;if(postSpace.area<snake.length+3)reward-=.25;totalReward+=reward;moves++;totalMoves++;updateCLI();trail.push({...next});if(trail.length>256)trail.shift();qEstimate=(qEstimate*.92+reward*.08);const nextState=state();if(humanMove){const demo={t:Date.now(),s:humanState||s,f:humanFeatures||observationFeatures(),a:action,dir:nd,r:Number(reward.toFixed(4)),ns:nextState,food:ateFood?1:0};manualSamples.push(demo);if(manualSamples.length>5000)manualSamples.shift();supervisedExamples.push({f:demo.f,a:action});if(supervisedExamples.length>5000)supervisedExamples.shift();if(manualSamples.length%10===0)persistLearning();$('manualStatus').textContent='Manual ON · '+manualSamples.length+' demonstrasi tersimpan';}learn(s,action,reward,nextState);lastState=s;lastAction=action;frames.push({snake:snake.map(p=>({...p})),food:{...food},walls:[...walls]});if(frames.length>16)frames.shift();if(score>best)best=score;render();updateStats();drawSNN();drawTrack();$('decision').textContent=dirs[dir].name+' · '+(action===1?'straight':action===0?'turn left':'turn right');$('decisionLog').textContent=`state ${s}\naction ${dirs[dir].name} / reward ${reward.toFixed(3)}\nnext distance ${dist(snake[0],food)} · Q ${((policy[s]||[0,0,0])[action]||0).toFixed(3)} · ε ${epsilon.toFixed(3)} · safe exits ${safeActionIndices().length} · no scripted route`}
+function learn(s,a,r,ns){const paradigm=$('learningParadigm')?.value||'RL';if(paradigm==='SUPERVISED'||paradigm==='HYBRID'){const f=observationFeatures(),safe=safeActionIndices();if(safe.length){const teacher=safe.reduce((best,i)=>actionSafety(i)>actionSafety(best)?i:best,safe[0]);supervisedExamples.push({f,a:teacher});if(supervisedExamples.length>5000)supervisedExamples.shift()}}if(!$('learn').checked)return;let q=policy[s]||(policy[s]=[0,0,0]);let nq=policy[ns]||[0,0,0];q[a]+=.18*(r+.88*Math.max(...nq)-q[a]);epsilon=Math.max(.04,epsilon*.9995);learningUpdates++;updateCLI();if(learningUpdates%20===0)persistLearning()}
+function endEpisode(){pause();episodes++;episode=episodes;const finishedGeneration=generation;genBest=Math.max(genBest,score);if(score>best){best=score;bestGeneration=finishedGeneration}history.unshift({generation:finishedGeneration,score,moves,bestScore:best,epsilon:Number(epsilon.toFixed(3)),states:Object.keys(policy).length});if(history.length>100)history.pop();log('Generation '+finishedGeneration+' ended · score '+score+' · all-time best '+best+' (Gen '+bestGeneration+')','warn');generation++;persistLearning();$('status').textContent='GEN '+finishedGeneration+' COMPLETE';$('overlay').querySelector('h3').textContent='Generation '+finishedGeneration+' complete';$('overlay').querySelector('p').textContent='Score '+score+'. Policy retained; next episode starts automatically when continuous learning is enabled.';render();updateStats();renderHistory();if($('continuous').checked){$('overlay').classList.add('hidden');autoRestartTimer=setTimeout(()=>{autoRestartTimer=null;reset(true);$('overlay').classList.add('hidden');start();},120)}}
+function start(){if(running)return;if(!snake||!snake.length)reset();running=true;manual=false;manualModeEnabled=false;if($('manualModeBtn'))$('manualModeBtn').textContent='Enable manual';if($('manualStatus')){$('manualStatus').classList.add('off');$('manualStatus').textContent='Manual mode OFF · AI controls the snake';}syncManualUI();$('overlay').classList.add('hidden');$('status').textContent='RUNNING';$('startBtn').textContent='Ⅱ Pause';timer=setInterval(()=>move(),Number($('speed').value));log('AI active · '+($('bfsMode').checked?'BFS food-route mode enabled.':'BFS disabled; Q-learning decision mode.')+' Agent running · '+$('model').value+($('model').value==='SNN_NEURO'?' · neuromorphic-like spiking visualization':$('model').value==='SNN'?' · standard SNN preset':' · policy preset'),'ok')}
+function pause(){running=false;if(timer)clearInterval(timer);timer=null;if($('status'))$('status').textContent='PAUSED';if($('startBtn'))$('startBtn').textContent='▶ Resume'}
+function render(){ctx.clearRect(0,0,512,512);let c=32;ctx.fillStyle='#09121e';ctx.fillRect(0,0,512,512);ctx.strokeStyle='#142438';ctx.lineWidth=1;for(let i=0;i<=N;i++){ctx.beginPath();ctx.moveTo(i*c,0);ctx.lineTo(i*c,512);ctx.stroke();ctx.beginPath();ctx.moveTo(0,i*c);ctx.lineTo(512,i*c);ctx.stroke()}
+walls.forEach(k=>{let [x,y]=k.split(',').map(Number);ctx.fillStyle='#31445c';ctx.fillRect(x*c+3,y*c+3,c-6,c-6);ctx.fillStyle='#506680';ctx.fillRect(x*c+5,y*c+5,c-10,3)});
+if($('showPath').checked){ctx.strokeStyle='#55f2a655';ctx.lineWidth=2;ctx.beginPath();trail.slice(-80).forEach((p,i)=>{let x=p.x*c+c/2,y=p.y*c+c/2;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke()}
+if($('showFoodPath')?.checked&&foodPath.length>1){ctx.save();ctx.strokeStyle='#ffbf69';ctx.lineWidth=3;ctx.setLineDash([5,5]);ctx.beginPath();foodPath.forEach((p,i)=>{const x=p.x*c+c/2,y=p.y*c+c/2;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();ctx.setLineDash([]);foodPath.slice(1).forEach(p=>{ctx.fillStyle='#ffbf69aa';ctx.beginPath();ctx.arc(p.x*c+c/2,p.y*c+c/2,3,0,Math.PI*2);ctx.fill()});ctx.restore()}
+if($('showVision').checked){let h=snake[0];ctx.fillStyle='#5bdcff12';ctx.fillRect(Math.max(0,h.x-3)*c,Math.max(0,h.y-3)*c,Math.min(N- Math.max(0,h.x-3),7)*c,Math.min(N-Math.max(0,h.y-3),7)*c)}
+if($('bfsMode')?.checked&&$('showBfsPath')?.checked){const bfsPath=bfsFoodPath();if(bfsPath.length>1){ctx.save();ctx.strokeStyle='#54c8ff';ctx.lineWidth=3.5;ctx.setLineDash([]);ctx.beginPath();bfsPath.forEach((p,i)=>{const x=p.x*c+c/2,y=p.y*c+c/2;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();bfsPath.slice(1,-1).forEach(p=>{ctx.fillStyle='#54c8ff';ctx.beginPath();ctx.arc(p.x*c+c/2,p.y*c+c/2,3.5,0,Math.PI*2);ctx.fill()});ctx.restore()}}
+snake.forEach((p,i)=>{ctx.fillStyle=i===0?'#b4ffd9':'#35c98b';ctx.beginPath();ctx.roundRect(p.x*c+2,p.y*c+2,c-4,c-4,6);ctx.fill();if(i===0){ctx.fillStyle='#07150e';let d=dirs[dir],ex=c/2+d.x*6,ey=c/2+d.y*6;ctx.beginPath();ctx.arc(p.x*c+ex-d.y*5,p.y*c+ey+d.x*5,2.2,0,7);ctx.arc(p.x*c+ex+d.y*5,p.y*c+ey-d.x*5,2.2,0,7);ctx.fill()}});
+ctx.fillStyle='#ffbf69';ctx.beginPath();ctx.arc(food.x*c+c/2,food.y*c+c/2,10+Math.sin(Date.now()/180)*1.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0c9';ctx.beginPath();ctx.arc(food.x*c+c/2-3,food.y*c+c/2-3,3,0,7);ctx.fill()}
+function drawSNN(){const model=$('model').value,canvas=$('snn'),ctx=canvas.getContext('2d'),panel=$('activityPanel');const n=16,cell=20;panel.style.display=(model==='PERCEPTRON'||model==='CNN')?'none':'';if(model==='PERCEPTRON'||model==='CNN')return;ctx.clearRect(0,0,320,320);let head=snake?snake[0]:{x:8,y:8},active=0;const isQuad=model==='QUADRUPLE',isNeuro=model==='SNN_NEURO';$('activityType').textContent=isQuad?'ENSEMBLE · combined signals':isNeuro?'SNN neuromorphic · LIF':'SNN · LIF neurons';$('activityLabel').textContent=isQuad?'Ensemble decision map':'Live membrane / spike map';$('activityHint').textContent=isQuad?'Full ensemble mode combines Q-learning, supervised action examples, unsupervised state clustering, CNN-like food-gradient scoring, perceptron-style features, SNN-inspired activation, and collision-safety scoring. These are lightweight concurrent components, not separate pretrained neural networks.':'Each cell is a leaky integrate-and-fire unit. Membrane potential integrates current input and leaks each tick; a spike is recorded only when the threshold is crossed. No timer-based or random spike animation.';for(let y=0;y<n;y++)for(let x=0;x<n;x++){const i=y*n+x,d=dist({x,y},head),fd=food?dist({x,y},food):16;let input=(d<5?Math.max(0,.95-d*.17):0)+(fd<6?Math.max(0,.8-fd*.13):0);if(walls&&walls.has(`${x},${y}`))input=0;let fired=false;if(!isQuad){const threshold=Number($('spikeThreshold').value)*(isNeuro ? .74 : 1),leak=Number($('spikeLeak').value)+(isNeuro ? .04 : 0),gain=Number($('spikeInput').value);membrane[i]=Math.max(0,membrane[i]*Math.min(.995,leak)+input*gain);if(membrane[i]>=threshold){fired=true;membrane[i]=0;spikeEvents++;}if(fired)active++;const v=Math.min(1,membrane[i]/threshold);ctx.fillStyle=fired?'#55f2a6':v>.12?'#42b9d7':'#193149';ctx.globalAlpha=fired?1:.45+v*.55;ctx.fillRect(x*cell+1,y*cell+1,cell-2,cell-2);if(fired){ctx.fillStyle='#eafff7';ctx.beginPath();ctx.arc(x*cell+10,y*cell+10,3,0,Math.PI*2);ctx.fill();}}else{const v1=Math.max(0,1-d/7),v2=Math.max(0,1-fd/8),v3=Math.max(0,1-Math.abs(d-fd)/8),v4=Math.max(v1,v2)*.55+v3*.45;const v=Math.min(1,(v1+v2+v3+v4)/4);ctx.fillStyle=v>.68?'#55f2a6':v>.22?'#42b9d7':'#193149';ctx.globalAlpha=.45+v*.55;ctx.fillRect(x*cell+1,y*cell+1,cell-2,cell-2);if(v>.68)active++;}}ctx.globalAlpha=1;$('activeNeurons').textContent=isQuad?active+' / 256 high activations':active+' spikes this tick · '+spikeEvents+' total';}
+function drawTrack(){tx.clearRect(0,0,320,320);tx.fillStyle='#09121e';tx.fillRect(0,0,320,320);let cell=20;for(let i=0;i<16;i++){tx.strokeStyle='#15263a';tx.beginPath();tx.moveTo(i*cell,0);tx.lineTo(i*cell,320);tx.moveTo(0,i*cell);tx.lineTo(320,i*cell);tx.stroke()}let recent=frames.slice(-16);recent.forEach((f,z)=>{let alpha=.08+(z+1)/recent.length*.45;f.walls.forEach(k=>{let [x,y]=k.split(',').map(Number);tx.fillStyle=`rgba(67,102,139,${alpha})`;tx.fillRect(x*cell+2,y*cell+2,cell-4,cell-4)});f.snake.forEach((p,i)=>{tx.fillStyle=i===0?`rgba(85,242,166,${alpha+.3})`:`rgba(49,201,139,${alpha})`;tx.fillRect(p.x*cell+3,p.y*cell+3,cell-6,cell-6)});tx.fillStyle=`rgba(255,191,105,${alpha+.25})`;tx.fillRect(f.food.x*cell+6,f.food.y*cell+6,8,8)});$('stackCount').textContent=recent.length+' / 16 frames'}
+function updateStats(){$('score').textContent=score||0;$('moves').textContent=moves||0;$('best').textContent=best;$('epsilon').textContent=epsilon.toFixed(2);$('qvalue').textContent=qEstimate.toFixed(2);$('weights').textContent=Object.keys(policy).length;$('episodeText').textContent='Episode '+episode;$('generationText').textContent='Gen '+generation;$('generationBest').textContent='Gen '+bestGeneration+' · '+best;$('progressBar').style.width=((Object.keys(policy).length===0&&learningUpdates===0)?0:Math.max(0,Math.min(100,100*(1-epsilon)/.96)))+'%'}
+function renderHistory(){const el=$('historyLog');if(!el)return;$('historyCount').textContent=history.length+' records';el.replaceChildren();if(!history.length){el.textContent='Belum ada episode selesai. Jalankan agent untuk mulai merekam hasil.';return}history.slice(0,30).forEach(h=>{const row=document.createElement('div');row.textContent='Gen '+h.generation+' · score '+h.score+' · moves '+h.moves+' · states '+h.states+(h.generation===bestGeneration?' · BEST SO FAR':'');if(h.generation===bestGeneration)row.className='ok';el.appendChild(row)})}
+function log(msg,cls=''){let el=document.createElement('div');el.className=cls;el.textContent='['+new Date().toLocaleTimeString()+'] '+msg;$('log').prepend(el);while($('log').children.length>50)$('log').lastChild.remove()}
+function save(){let data={app:'NeuroSnake',version:2,config:{continuous:$('continuous').checked,rbEnabled:$('rbEnabled').checked,rbSelf:$('rbSelf').checked,rbNoFood:$('rbNoFood').checked,rbMaze:$('rbMaze').checked,rbPass:$('rbPass').checked,learningParadigm:$('learningParadigm').value,model:$('model').value,maze:$('maze').value,speed:$('speed').value,difficulty:$('difficulty').value,learn:$('learn').checked,showVision:$('showVision').checked,showPath:$('showPath').checked,showFoodPath:$('showFoodPath').checked,bfsMode:$('bfsMode').checked,showBfsPath:$('showBfsPath').checked,recordManual:$('recordManual').checked,gamepadEnabled:$('gamepadEnabled').checked},manualSamples:manualSamples.slice(-5000),state:{snake,dir,food,walls:[...walls],moves,score,best,bestGeneration,history,episode,generation,genBest,epsilon,qEstimate,trail,frames,totalReward,totalFoods,totalMoves,learningUpdates},policy};let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='neurosnake-state.json';a.click();URL.revokeObjectURL(a.href);log('Exported state and policy to JSON','ok')}
+function load(data){if(!data||data.app!=='NeuroSnake')throw Error('Not a NeuroSnake JSON file');pause();let c=data.config||{},s=data.state||{};for(let id of ['model','maze','speed','difficulty','learningParadigm'])if(c[id]!==undefined)$(id).value=c[id];updateParadigmUI();for(let id of ['learn','showVision','showPath','showFoodPath','bfsMode','showBfsPath','continuous','rbEnabled','rbSelf','rbNoFood','rbMaze','rbPass','recordManual','gamepadEnabled'])if(c[id]!==undefined&&$(id))$(id).checked=c[id];syncRuleBreakerUI();manualSamples=Array.isArray(data.manualSamples)?data.manualSamples.slice(-5000):manualSamples;policy=data.policy||{};if(s.snake&&s.food){snake=s.snake;dir=s.dir||1;food=s.food;walls=new Set(s.walls||[]);moves=s.moves||0;score=s.score||0;best=s.best||0;bestGeneration=s.bestGeneration||1;history=Array.isArray(s.history)?s.history:[];episode=s.episode||1;generation=s.generation||episode;genBest=s.genBest||0;epsilon=s.epsilon??.9;qEstimate=s.qEstimate||0;totalReward=Number(s.totalReward)||0;totalFoods=Number(s.totalFoods)||0;totalMoves=Number(s.totalMoves)||0;learningUpdates=Number(s.learningUpdates)||0;trail=s.trail||[];frames=s.frames||[];foodPath=[{...snake[0]}]}else{makeWalls();snake=[{x:4,y:8},{x:3,y:8},{x:2,y:8}];dir=1;moves=score=0;food=spawnFood();trail=[];foodPath=[{...snake[0]}];frames=[]}episodes=episode;$('overlay').classList.remove('hidden');$('overlay').querySelector('h3').textContent='State loaded';$('overlay').querySelector('p').textContent='JSON state restored. Start the agent to continue.';syncManualUI();render();updateStats();updateCLI();drawSNN();drawTrack();renderHistory();log('JSON loaded · '+Object.keys(policy).length+' policy states','ok')}
+$('startBtn').onclick=()=>running?pause():start();$('overlayStart').onclick=start;$('resetBtn').onclick=reset;
+function exportCSV(){let rows=[['generation','episode','state','action_index','q_left','q_straight','q_right','epsilon','best_score','model']];for(const [st,qs] of Object.entries(policy))rows.push([generation,episode,st,'',...qs,epsilon,best,$('model').value]);let csv=rows.map(r=>r.map(v=>{let t=String(v??'');return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t}).join(',')).join('\n');let blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='neurosnake-training-data.csv';a.click();URL.revokeObjectURL(a.href);log('Scientific CSV exported · '+(rows.length-1)+' policy records','ok')}
+function updateSpikeControls(){for(const id of ['spikeThreshold','spikeInput','spikeLeak'])$(id+'Value').textContent=Number($(id).value).toFixed(2);drawSNN()}$('showFoodPath').addEventListener('change',render);$('bfsMode').addEventListener('change',()=>{log('BFS mode '+($('bfsMode').checked?'ON · AI uses breadth-first search to choose a food route':'OFF · BFS disabled; learned decision policy active'),'ok');render()});$('showBfsPath').addEventListener('change',render);
+['spikeThreshold','spikeInput','spikeLeak'].forEach(id=>$(id).addEventListener('input',updateSpikeControls));$('spikeReset').onclick=()=>{$('spikeThreshold').value='.46';$('spikeInput').value='.42';$('spikeLeak').value='.89';membrane.fill(0);spikeEvents=0;updateSpikeControls();log('Manual spike settings reset to defaults','ok')};updateSpikeControls();
+$('rbEnabled').addEventListener('change',()=>{syncRuleBreakerUI();log('Rule Breaker master switch: '+($('rbEnabled').checked?'ON':'OFF'),'warn')});['rbSelf','rbNoFood','rbMaze','rbPass'].forEach(id=>$(id).addEventListener('change',()=>log('Rule-Breaker option '+id+': '+($(id).checked?'ON':'OFF')+' · safety preference retained','ok')));syncRuleBreakerUI();$('learningParadigm').onchange=()=>{updateParadigmUI();log('Learning paradigm set to '+$('learningParadigm').options[$('learningParadigm').selectedIndex].text,'ok')};updateParadigmUI();$('csvBtn').onclick=exportCSV;$('demoCsvBtn').onclick=()=>{const rows=[['timestamp','state','features','action_index','absolute_direction','reward','next_state','food'] ,...manualSamples.map(d=>[d.t,d.s,JSON.stringify(d.f),d.a,d.dir,d.r,d.ns,d.food])];const csv=rows.map(r=>r.map(v=>{const t=String(v??'');return /[",\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t}).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='neurosnake-human-demonstrations.csv';a.click();URL.revokeObjectURL(a.href);log('Exported '+manualSamples.length+' human demonstrations to CSV','ok')};$('exportBtn').onclick=save;$('importBtn').onclick=()=>$('fileInput').click();$('fileInput').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{load(JSON.parse(await f.text()))}catch(err){alert('Could not load JSON: '+err.message)}e.target.value=''};$('clearLog').onclick=()=>$('log').replaceChildren();$('maze').onchange=()=>{reset();log('Maze preset changed','ok')};$('speed').onchange=()=>{if(running){pause();start()}};$('model').onchange=()=>{drawSNN();log('Model preset set to '+$('model').value,'ok')};
+// Reset the complete NeuroSnake training session and its persisted learning data.
+function clearLearningData(){
+  if(!confirm('Reset SEMUA data NeuroSnake ke nol?\n\nAkan dihapus/reset:\n• localStorage NeuroSnake\n• Semua policy/nilai Q dan contoh training\n• Semua cluster dan statistik observasi\n• Semua riwayat, skor terbaik, generasi, dan episode\n• Memori anti-loop, jejak, dan state permainan\n• Pengaturan spike kembali ke default\n\nFile JSON/CSV yang sudah diunduh di perangkat tidak ikut terhapus.'))return;
+  pause();
+  if(autoRestartTimer){clearTimeout(autoRestartTimer);autoRestartTimer=null;}
+  try{
+    // Remove the app's persisted training key, without touching unrelated sites' storage.
+    localStorage.removeItem(MEMORY_KEY);
+  }catch(e){log('Tidak dapat mengakses localStorage browser','warn');}
+
+  // Clear every in-memory learning structure.
+  policy={}; epsilon=.25; qEstimate=0; learningUpdates=0; totalReward=0; totalFoods=0; totalMoves=0; manualSamples=[];
+  supervisedExamples.length=0; clusters.length=0; observationCounts.clear();
+  history=[]; recentVisits.clear(); recentTrail=[];
+  generation=1; episode=1; episodes=0; genBest=0; best=0; bestGeneration=1;
+  lastState=''; lastAction=1; trail=[]; frames=[]; moves=0; score=0;
+  membrane.fill(0); activity.fill(0); spikeEvents=0;
+
+  // Restore the visible controls to the original page defaults.
+  $('learningParadigm').value='RL'; $('model').value='CNN'; $('maze').value='none'; $('rbEnabled').checked=false; $('rbSelf').checked=false; $('rbNoFood').checked=false; $('rbMaze').checked=false; $('rbPass').checked=false; syncRuleBreakerUI();
+  $('speed').value='120'; $('difficulty').value='safe';
+  $('learn').checked=true; $('continuous').checked=false; $('recordManual').checked=true; $('gamepadEnabled').checked=true; manualModeEnabled=false; $('manualModeBtn').textContent='Enable manual'; $('manualStatus').classList.add('off'); $('manualStatus').textContent='Manual mode OFF · AI controls the snake';
+  $('showVision').checked=true; $('showPath').checked=true; $('showFoodPath').checked=true;
+  $('spikeThreshold').value='.46'; $('spikeInput').value='.42'; $('spikeLeak').value='.89';
+  updateParadigmUI(); updateSpikeControls();
+
+  reset(false);
+  // reset(false) creates a fresh episode; normalize all counters once more.
+  generation=1; episode=1; episodes=0; moves=0; score=0; best=0; genBest=0; bestGeneration=1;
+  epsilon=.25; qEstimate=0; policy={}; learningUpdates=0;
+  history=[]; supervisedExamples.length=0; clusters.length=0; observationCounts.clear();
+  recentVisits.clear(); recentTrail=[]; trail=[]; frames=[];
+  $('overlay').querySelector('h3').textContent='Ready to learn';
+  $('overlay').querySelector('p').textContent='All training data reset. The agent is ready to start from zero.';
+  $('status').textContent='IDLE'; $('startBtn').textContent='▶ Start agent';
+  syncManualUI();
+  render(); updateStats(); renderHistory(); drawSNN(); drawTrack();
+  // Ensure an empty state is not recreated in localStorage by the reset.
+  try{localStorage.removeItem(MEMORY_KEY)}catch(e){}
+  updateCLI();cli('reset total: all training counters cleared');log('RESET TOTAL · seluruh training NeuroSnake kembali ke nol','warn');
+}
+$('clearDataBtn').onclick=clearLearningData;$('cliRun').onclick=runCLI;$('cliInput').addEventListener('keydown',e=>{if(e.key==='Enter')runCLI()});
+// Grey-out manual/gamepad controls when manual mode is OFF.
+function syncManualUI(){
+  const on=manualModeEnabled;
+  const mBox=document.querySelector('.manual-box.compact');
+  const eBox=document.querySelector('.env-input-toggle');
+  if(mBox)mBox.classList.toggle('manual-off',!on);
+  if(eBox)eBox.classList.toggle('manual-off',!on);
+  const rec=$('recordManual');if(rec)rec.disabled=!on;
+  const gp=$('gamepadEnabled');if(gp)gp.disabled=!on;
+  document.querySelectorAll('.dpad button[data-dir]').forEach(b=>{b.disabled=!on});
+}
+function enterManual(){if(!manualModeEnabled){manualModeEnabled=true;pause();manual=true;$('overlay').classList.add('hidden');$('manualModeBtn').textContent='Disable manual';$('manualStatus').classList.remove('off');$('manualStatus').textContent='Manual ON · '+manualSamples.length+' demonstrasi tersimpan';$('status').textContent='MANUAL';log('Manual mode enabled · user actions can be saved as demonstrations','ok');}else{manualModeEnabled=false;manual=false;$('manualModeBtn').textContent='Enable manual';$('manualStatus').classList.add('off');$('manualStatus').textContent='Manual mode OFF · AI controls the snake';$('status').textContent='PAUSED';log('Manual mode disabled','ok');}syncManualUI(); }
+function manualDirection(nd){if(!manualModeEnabled)enterManual();pause();manual=true;if((nd+2)%4===dir)return;const idx=actions().indexOf(nd);if(idx>=0)move(idx);}
+$('manualModeBtn').onclick=enterManual;
+document.querySelectorAll('.dpad button[data-dir]').forEach(b=>{const go=e=>{e.preventDefault();manualDirection(Number(b.dataset.dir))};b.addEventListener('pointerdown',go);b.addEventListener('click',e=>{if(e.detail===0)go(e)});});
+function keyDirection(e){const k=e.key.toLowerCase(),map={arrowup:0,w:0,'8':0,numpad8:0,arrowright:1,d:1,'6':1,numpad6:1,arrowdown:2,s:2,'2':2,numpad2:2,arrowleft:3,a:3,'4':3,numpad4:3};return map[k]}
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){e.preventDefault();if(manualModeEnabled){enterManual();}else running?pause():start();return}if(e.key.toLowerCase()==='r'&&e.target.tagName!=='INPUT'&&e.target.tagName!=='TEXTAREA'){reset();return}if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;const nd=keyDirection(e);if(nd!==undefined){e.preventDefault();manualDirection(nd)}});
+// Poll standard Gamepad API: analog stick and D-pad/buttons work with most USB/Bluetooth controllers, including PS4/PS5.
+function pollGamepad(){if(!manualModeEnabled||!$('gamepadEnabled').checked){gamepadLastDir=-1;return}const pads=navigator.getGamepads?navigator.getGamepads():[];let chosen=null;for(const p of pads){if(p&&p.connected){chosen=p;break}}if(!chosen){gamepadLastDir=-1;return}let x=chosen.axes?.[0]||0,y=chosen.axes?.[1]||0,nd=-1;const dead=.55;if(Math.abs(x)>dead||Math.abs(y)>dead){if(Math.abs(x)>Math.abs(y))nd=x>0?1:3;else nd=y>0?2:0}else{const b=chosen.buttons||[];if(b[12]?.pressed)nd=0;else if(b[15]?.pressed)nd=1;else if(b[13]?.pressed)nd=2;else if(b[14]?.pressed)nd=3;}if(nd>=0&&nd!==gamepadLastDir){manualDirection(nd);gamepadLastDir=nd}else if(nd<0)gamepadLastDir=-1}
+gamepadPoll=setInterval(pollGamepad,90);
+$('log').textContent='[system] Initializing environment…';restoreLearning();reset();syncManualUI();renderHistory();updateCLI();cli('NeuroSnake CLI ready. Type help.');log('Neural lab initialized · persistent learning enabled · Rule-Breaker master switch available','ok');// Neural activity updates only on game ticks or manual control changes; no background animation while paused.
+})();
+</script></body></html>
+<style>
+/* Compact touch gamepad for small screens */
+.dpad{grid-template-columns:repeat(3,32px);grid-template-rows:repeat(3,29px);gap:3px;margin:8px auto 2px}
+.dpad button{font-size:14px;border-radius:6px}
+.manual-box{padding:10px}
+.manual-head strong{font-size:11px}
+.manual-status{font-size:10px;margin-top:6px}
+@media(max-width:720px){
+  .manual-box{padding:8px;margin-top:10px}
+  .dpad{grid-template-columns:repeat(3,29px);grid-template-rows:repeat(3,27px);gap:2px;margin:6px auto 2px}
+  .dpad button{font-size:12px;border-radius:5px}
+  .manual-options{gap:5px;margin-top:7px}
+  .manual-box .hint{font-size:10px;line-height:1.35;margin-top:7px}
+}
+@media(max-width:360px){
+  .dpad{grid-template-columns:repeat(3,26px);grid-template-rows:repeat(3,24px);gap:2px}
+  .dpad button{font-size:11px}
+}
+/* Final mobile viewport fix: keep the arena unobstructed and reclaim screen space. */
+@media(max-width:720px){
+  header{position:relative;top:auto;backdrop-filter:none;padding:8px 10px;gap:8px}
+  .brand{gap:8px}
+  .logo{width:30px;height:30px;font-size:18px;border-radius:9px}
+  .brand h1{font-size:16px}
+  .brand p{font-size:10px;line-height:1.25}
+  .layout{padding:6px;gap:8px}
+  .game-panel{order:-100;position:relative;display:block;visibility:visible;max-width:100%;}
+  .game-panel .panel-head{padding:8px 10px}
+  .game-panel .panel-body{padding:7px}
+  /* The overlay covers the entire board on load; mobile has a separate Start button below it. */
+  .game-panel .game-wrap .overlay{display:none!important}
+  .game-wrap{width:min(100%, calc(100vw - 28px));max-width:calc(100vw - 28px)}
+  .game-canvas{width:100%;max-width:100%;height:auto;aspect-ratio:1}
+  .game-top{margin-bottom:5px}
+  .game-panel .hint{margin-top:5px}
+  .game-panel .hint + .game-actions{margin-top:7px}
+}
+@media(max-width:380px){
+  .game-wrap{width:calc(100vw - 24px);max-width:calc(100vw - 24px)}
+  .game-panel .panel-body{padding:5px}
+  .game-panel .panel-head h2{font-size:11px}
+}
+
+/* ===== Compact manual / demo panel (moved above Start / Reset) ===== */
+.manual-box.compact{margin-top:10px;padding:8px 10px;border-radius:10px}
+.manual-box.compact .manual-head{gap:6px;justify-content:flex-start;flex-wrap:wrap}
+.manual-box.compact .manual-head strong{font-size:10px;letter-spacing:.09em;color:var(--muted);flex:1 1 auto}
+.manual-box.compact .manual-head .manual-options{margin:0;display:flex;gap:8px;flex:0 0 auto}
+.manual-box.compact .manual-options label{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.manual-box.compact .manual-head button{padding:4px 9px;font-size:11px;border-radius:6px;flex:0 0 auto}
+.manual-box.compact .manual-grid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;margin-top:6px}
+.manual-box.compact .dpad{grid-template-columns:repeat(3,28px);grid-template-rows:repeat(3,25px);gap:2px;margin:0;max-width:none}
+.manual-box.compact .dpad button{font-size:11px;border-radius:5px;font-weight:800;padding:0}
+.manual-box.compact .manual-side{min-width:0}
+.manual-box.compact .manual-status{font-size:10px;margin:0;text-align:left;line-height:1.3}
+.manual-box.compact .manual-side .hint{font-size:10px;line-height:1.3;margin:3px 0 0}
+@media(max-width:720px){
+  .manual-box.compact{padding:7px 8px;margin-top:8px}
+  .manual-box.compact .manual-head strong{font-size:9.5px}
+  .manual-box.compact .manual-head button{padding:3px 8px;font-size:10px}
+  .manual-box.compact .manual-options label{font-size:9.5px}
+  .manual-box.compact .manual-grid{gap:8px;margin-top:5px}
+  .manual-box.compact .dpad{grid-template-columns:repeat(3,26px);grid-template-rows:repeat(3,23px);gap:2px}
+  .manual-box.compact .dpad button{font-size:10px}
+  .manual-box.compact .manual-status{font-size:9.5px}
+  .manual-box.compact .manual-side .hint{font-size:9.5px}
+}
+@media(max-width:360px){
+  .manual-box.compact .dpad{grid-template-columns:repeat(3,24px);grid-template-rows:repeat(3,22px)}
+  .manual-box.compact .dpad button{font-size:9.5px}
+}
+
+/* ===== Grey-out controls when manual mode is OFF ===== */
+.manual-box.compact.manual-off .manual-grid,
+.manual-box.compact.manual-off .manual-options{
+  opacity:.4;
+  filter:grayscale(.8);
+  transition:opacity .2s ease,filter .2s ease;
+}
+.manual-box.compact.manual-off .dpad button,
+.manual-box.compact.manual-off .manual-options input{
+  pointer-events:none;
+  cursor:not-allowed;
+}
+.env-input-toggle.manual-off{
+  opacity:.5;
+  filter:grayscale(.6);
+  transition:opacity .2s ease,filter .2s ease;
+}
+.env-input-toggle.manual-off input{
+  pointer-events:none;
+  cursor:not-allowed;
+}
+.env-input-toggle.manual-off label{
+  color:var(--muted);
+}
+</style>
+</body>
+</html>
